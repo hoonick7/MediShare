@@ -22,7 +22,7 @@ contract MediShare {
     struct HealthData {
         uint256 pid;
         string dataHash;
-        uint256 price;
+        uint256 minPrice;
         address payable seller;
         uint256 timestamp;
     }
@@ -58,12 +58,12 @@ contract MediShare {
         return true;
     }
 
-    function uploadHealthData(uint256 pid, string memory dataHash, uint256 price) public {
+    function uploadHealthData(uint256 pid, string memory dataHash, uint256 minPrice) public {
         require(bytes(dataHash).length > 0, "Invalid data hash");
         healthDataRecords[pid] = HealthData({
             pid: pid,
             dataHash: dataHash,
-            price: price,
+            minPrice: minPrice * 10**uint256(decimals),
             seller: payable(msg.sender),
             timestamp: block.timestamp
         });
@@ -72,22 +72,23 @@ contract MediShare {
         emit HealthDataUploaded(pid, dataHash, msg.sender);
     }
 
-    function purchaseHealthData(address seller, address buyer, address validatorAddr, uint256 pid, uint256 price) public {
+    function purchaseHealthData(address seller, address buyer, address validatorAddr, uint256 pid, uint256 offerPrice, string memory dataHash) public {
         HealthData storage data = healthDataRecords[pid];
         require(bytes(data.dataHash).length > 0, "Data does not exist");
-        require(balanceOf[buyer] >= price, "Insufficient balance to purchase data");
-        require(data.price == price, "Incorrect price");
+        require(keccak256(abi.encodePacked(data.dataHash)) == keccak256(abi.encodePacked(dataHash)), "Data hash mismatch");
+        require(balanceOf[buyer] >= offerPrice * 10**uint256(decimals), "Insufficient balance to purchase data");
+        require(offerPrice * 10**uint256(decimals) >= data.minPrice, "Offer price is too low");
 
-        uint256 sellerAmount = (price * 90) / 100;
-        uint256 validatorFee = price - sellerAmount;
+        uint256 sellerAmount = (offerPrice * 90 * 10**uint256(decimals)) / 100;
+        uint256 validatorFee = (offerPrice * 10**uint256(decimals)) - sellerAmount;
 
-        balanceOf[buyer] -= price;
+        balanceOf[buyer] -= offerPrice * 10**uint256(decimals);
         balanceOf[seller] += sellerAmount;
         balanceOf[validatorAddr] += validatorFee;
 
         emit Transfer(buyer, seller, sellerAmount);
         emit Transfer(buyer, validatorAddr, validatorFee);
-        emit HealthDataPurchased(pid, buyer, seller, price);
+        emit HealthDataPurchased(pid, buyer, seller, offerPrice * 10**uint256(decimals));
     }
 
     function burnOldData() public {
