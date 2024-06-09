@@ -7,6 +7,8 @@ contract MediShare {
     uint8 public decimals = 18;
     uint256 public totalSupply;
 
+    address public validator;
+
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
 
@@ -30,7 +32,8 @@ contract MediShare {
 
     mapping(uint256 => HealthData) public healthDataRecords;
 
-    constructor() {
+    constructor(address _validator) {
+        validator = _validator;
         lastRewardTimestamp = block.timestamp;
     }
 
@@ -67,7 +70,7 @@ contract MediShare {
             seller: payable(msg.sender),
             timestamp: block.timestamp
         });
-        _mint(msg.sender, 1 * 10**uint256(decimals)); // 1 coin per upload
+        _mint(msg.sender, 100 * 10**uint256(decimals)); // 100 MDS per upload for testing
         emit HealthDataUploaded(pid, dataHash, msg.sender);
     }
 
@@ -80,8 +83,7 @@ contract MediShare {
         uint256 validatorFee = msg.value - sellerAmount;
 
         data.seller.transfer(sellerAmount);
-        // Validator fee goes to the contract owner
-        payable(owner()).transfer(validatorFee);
+        payable(validator).transfer(validatorFee);
 
         emit HealthDataPurchased(pid, msg.sender, data.seller, data.price);
     }
