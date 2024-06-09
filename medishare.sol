@@ -106,6 +106,10 @@ contract MediShare {
         _mint(account3, 500 * 10**uint256(decimals)); // 500 MDS to account3
     }
 
+    function getBalances(address account1, address account2, address account3) public view returns (uint256, uint256, uint256) {
+        return (balanceOf[account1], balanceOf[account2], balanceOf[account3]);
+    }
+
     function _mint(address account, uint256 amount) internal {
         require(account != address(0), "Mint to the zero address");
         totalSupply += amount;
