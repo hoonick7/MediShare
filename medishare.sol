@@ -12,9 +12,6 @@ contract MediShare {
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
 
-    uint256 public stakeRewardRate = 5; // 5% annual reward
-    uint256 public lastRewardTimestamp;
-
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
     event HealthDataUploaded(uint256 indexed pid, string dataHash, address indexed uploader);
@@ -34,7 +31,6 @@ contract MediShare {
 
     constructor(address _validator) {
         validator = _validator;
-        lastRewardTimestamp = block.timestamp;
     }
 
     function transfer(address _to, uint256 _value) public returns (bool success) {
@@ -70,21 +66,24 @@ contract MediShare {
             seller: payable(msg.sender),
             timestamp: block.timestamp
         });
-        _mint(msg.sender, 100 * 10**uint256(decimals)); // 100 MDS per upload for testing
+        _mint(msg.sender, 1 * 10**uint256(decimals)); // 1 MDS per upload
         emit HealthDataUploaded(pid, dataHash, msg.sender);
     }
 
-    function purchaseHealthData(uint256 pid) public payable {
+    function purchaseHealthData(uint256 pid) public {
         HealthData storage data = healthDataRecords[pid];
         require(bytes(data.dataHash).length > 0, "Data does not exist");
-        require(msg.value == data.price, "Incorrect price");
+        require(balanceOf[msg.sender] >= data.price, "Insufficient balance to purchase data");
 
-        uint256 sellerAmount = (msg.value * 90) / 100;
-        uint256 validatorFee = msg.value - sellerAmount;
+        uint256 sellerAmount = (data.price * 90) / 100;
+        uint256 validatorFee = data.price - sellerAmount;
 
-        data.seller.transfer(sellerAmount);
-        payable(validator).transfer(validatorFee);
+        balanceOf[msg.sender] -= data.price;
+        balanceOf[data.seller] += sellerAmount;
+        balanceOf[validator] += validatorFee;
 
+        emit Transfer(msg.sender, data.seller, sellerAmount);
+        emit Transfer(msg.sender, validator, validatorFee);
         emit HealthDataPurchased(pid, msg.sender, data.seller, data.price);
     }
 
