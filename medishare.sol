@@ -72,7 +72,7 @@ contract MediShare {
         emit HealthDataUploaded(pid, dataHash, msg.sender);
     }
 
-    function purchaseHealthData(address seller, address buyer, address validator, uint256 pid, uint256 price) public {
+    function purchaseHealthData(address seller, address buyer, address validatorAddr, uint256 pid, uint256 price) public {
         HealthData storage data = healthDataRecords[pid];
         require(bytes(data.dataHash).length > 0, "Data does not exist");
         require(balanceOf[buyer] >= price, "Insufficient balance to purchase data");
@@ -83,10 +83,10 @@ contract MediShare {
 
         balanceOf[buyer] -= price;
         balanceOf[seller] += sellerAmount;
-        balanceOf[validator] += validatorFee;
+        balanceOf[validatorAddr] += validatorFee;
 
         emit Transfer(buyer, seller, sellerAmount);
-        emit Transfer(buyer, validator, validatorFee);
+        emit Transfer(buyer, validatorAddr, validatorFee);
         emit HealthDataPurchased(pid, buyer, seller, price);
     }
 
