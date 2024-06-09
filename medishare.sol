@@ -100,6 +100,12 @@ contract MediShare {
         }
     }
 
+    function distributeInitialTokens(address account1, address account2, address account3) public {
+        _mint(account1, 500 * 10**uint256(decimals)); // 500 MDS to account1
+        _mint(account2, 500 * 10**uint256(decimals)); // 500 MDS to account2
+        _mint(account3, 500 * 10**uint256(decimals)); // 500 MDS to account3
+    }
+
     function _mint(address account, uint256 amount) internal {
         require(account != address(0), "Mint to the zero address");
         totalSupply += amount;
