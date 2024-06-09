@@ -27,6 +27,7 @@ contract MediShare {
         uint256 timestamp;
     }
 
+    uint256[] public allPids;
     mapping(uint256 => HealthData) public healthDataRecords;
 
     constructor(address _validator) {
@@ -66,6 +67,7 @@ contract MediShare {
             seller: payable(msg.sender),
             timestamp: block.timestamp
         });
+        allPids.push(pid);
         _mint(msg.sender, 1 * 10**uint256(decimals)); // 1 MDS per upload
         emit HealthDataUploaded(pid, dataHash, msg.sender);
     }
@@ -89,7 +91,8 @@ contract MediShare {
 
     function burnOldData() public {
         uint256 burnThreshold = 5 * 365 days; // 5 years
-        for (uint256 pid = 1; pid <= totalSupply; pid++) {
+        for (uint256 i = 0; i < allPids.length; i++) {
+            uint256 pid = allPids[i];
             if (healthDataRecords[pid].timestamp != 0 && block.timestamp > healthDataRecords[pid].timestamp + burnThreshold) {
                 delete healthDataRecords[pid];
                 emit DataBurned(pid, healthDataRecords[pid].timestamp);
