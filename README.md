@@ -39,8 +39,9 @@ MDS는 앱테크 서비스 등에서 무의미하게 버려질 수 있는 건강
 ```bash
 git clone https://github.com/hoonick7/MediShare.git
 cd MediShare
+```
 
-### 팀원
+## 팀원
 
 - 이훈익 (Hoonick Lee, https://github.com/hoonick7)
 - 김다인 (Dain Kim, https://github.com/)
