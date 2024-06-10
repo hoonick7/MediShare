@@ -46,4 +46,4 @@ cd MediShare
 - 이훈익 (Hoonick Lee, https://github.com/hoonick7)
 - 김다인 (Dain Kim, https://github.com/)
 - 김찬휘 (Chanhwi Kim, https://github.com/Chanwhistle)
-- 황현 (Hwang Hyeon, https://github.com/https://github.com/HwangHyeoni)
+- 황현 (Hwang Hyeon, https://github.com/HwangHyeoni)
